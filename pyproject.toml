@@ -13,7 +13,7 @@ readme = "README.md"
 license = { file = "LICENSE.txt" }
 requires-python = ">=3.10"
 authors = [
-    { name = "Marcos Rogério Lótici Alves", email = "marcos.alves@example.com" },
+    { name = "Marcos Cordeiro de Brito Jr", email = "marcoscbrito@gmail.com" },
 ]
 keywords = [
     "java", "ast", "dependency-graph", "software-metrics",

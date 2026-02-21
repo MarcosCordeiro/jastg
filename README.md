@@ -288,7 +288,7 @@ Run provenance for reproducibility:
   "javalang_version": "0.13.0",
   "networkx_version": "3.3",
   "config_hash": "sha256hex...",
-  "data_execucao": "2024-01-01T12:00:00+00:00",
+  "data_execucao": "2026-02-21T12:00:00+00:00",
   "commit_hash": "abc123...",
   "numero_classes": 9,
   "numero_arestas": 12,
@@ -338,10 +338,10 @@ are created as strings in memory during the test session.
 If you use JASTG in your research, please cite:
 
 ```bibtex
-@software{jastg2024,
-  author    = {Alves, Marcos Rogério Lótici},
+@software{jastg2026,
+  author    = {Brito Jr, Marcos Cordeiro de},
   title     = {{JASTG}: {Java AST Structural Graph}},
-  year      = {2024},
+  year      = {2026},
   version   = {1.0.0},
   url       = {https://github.com/MarcosCordeiro/jastg},
   license   = {MIT}
