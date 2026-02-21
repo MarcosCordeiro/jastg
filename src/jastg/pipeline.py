@@ -73,16 +73,14 @@ def run(
     """
     if len(dominios) != len(caminhos):
         raise ValueError(
-            f"dominios ({len(dominios)}) and caminhos ({len(caminhos)}) "
-            "must have the same length."
+            f"dominios ({len(dominios)}) and caminhos ({len(caminhos)}) must have the same length."
         )
 
     caminhos_path = [Path(c) for c in caminhos]
 
     # Build config object for reproducibility hash
     config = AnalysisConfig(
-        domains=[DomainSpec(name=d, path=p)
-                 for d, p in zip(dominios, caminhos_path, strict=False)],
+        domains=[DomainSpec(name=d, path=p) for d, p in zip(dominios, caminhos_path, strict=False)],
         output_dir=Path(output_dir),
         weighted=ponderado,
         directed=direcionado,
@@ -92,10 +90,9 @@ def run(
 
     # ── Pass 1: collect internal classes ──────────────────────────────────────
     logger.info("Pass 1: collecting internal classes...")
-    (classes_internas,
-     index_nome_simples,
-     _dominio_por_classe,
-     total_arquivos) = coletar_classes_internas(dominios, caminhos_path)
+    (classes_internas, index_nome_simples, _dominio_por_classe, total_arquivos) = (
+        coletar_classes_internas(dominios, caminhos_path)
+    )
     logger.info("Java files found: %d", total_arquivos)
     logger.info("Internal classes found: %d", len(classes_internas))
 
@@ -121,8 +118,10 @@ def run(
                 continue
 
             resultados_arquivo = extrair_dependencias_e_metricas(
-                tree, arquivo.name,
-                classes_internas, index_nome_simples,
+                tree,
+                arquivo.name,
+                classes_internas,
+                index_nome_simples,
                 dominio,
                 qualifier_heuristic=qualifier_heuristic,
             )
@@ -138,8 +137,12 @@ def run(
     # ── Export ────────────────────────────────────────────────────────────────
     logger.info("Generating output files...")
     _arestas_escritas, metadata = exportar_saidas(
-        resultados, arestas_globais, classes_internas,
-        total_arquivos, erros, config.output_dir,
+        resultados,
+        arestas_globais,
+        classes_internas,
+        total_arquivos,
+        erros,
+        config.output_dir,
         ponderado=ponderado,
         direcionado=direcionado,
         config_hash=config.config_hash(),
@@ -147,13 +150,13 @@ def run(
 
     logger.info(
         "Done. classes=%d  edges=%d  errors=%d",
-        metadata["numero_classes"], metadata["numero_arestas"], erros,
+        metadata["numero_classes"],
+        metadata["numero_arestas"],
+        erros,
     )
 
     if logger.isEnabledFor(logging.DEBUG):
-        top_cbo = sorted(
-            resultados.items(), key=lambda x: x[1]["CBO"], reverse=True
-        )[:10]
+        top_cbo = sorted(resultados.items(), key=lambda x: x[1]["CBO"], reverse=True)[:10]
         if top_cbo:
             logger.debug("Top 10 classes by CBO:")
             for nome, metricas in top_cbo:

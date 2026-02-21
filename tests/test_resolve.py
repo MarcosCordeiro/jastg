@@ -15,9 +15,7 @@ def test_resolve_outer_inner_dot_to_dollar(classes_internas, index_nome_simples)
         classes_internas=classes_internas,
         index_nome_simples=index_nome_simples,
     )
-    assert result == "com.example.Foo$Inner", (
-        f"Expected 'com.example.Foo$Inner', got {result!r}"
-    )
+    assert result == "com.example.Foo$Inner", f"Expected 'com.example.Foo$Inner', got {result!r}"
 
 
 def test_resolve_pkg_outer_inner_dot_to_dollar(classes_internas, index_nome_simples):
@@ -30,9 +28,7 @@ def test_resolve_pkg_outer_inner_dot_to_dollar(classes_internas, index_nome_simp
         classes_internas=classes_internas,
         index_nome_simples=index_nome_simples,
     )
-    assert result == "com.example.Foo$Inner", (
-        f"Expected 'com.example.Foo$Inner', got {result!r}"
-    )
+    assert result == "com.example.Foo$Inner", f"Expected 'com.example.Foo$Inner', got {result!r}"
 
 
 def test_limitation_outer_inner_deep_dot_discarded(classes_internas, index_nome_simples):
@@ -49,9 +45,7 @@ def test_limitation_outer_inner_deep_dot_discarded(classes_internas, index_nome_
         classes_internas=classes_internas,
         index_nome_simples=index_nome_simples,
     )
-    assert result is None, (
-        f"Expected None (documented limitation), got {result!r}"
-    )
+    assert result is None, f"Expected None (documented limitation), got {result!r}"
 
 
 def test_dollar_notation_resolves_directly(classes_internas, index_nome_simples):

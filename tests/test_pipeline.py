@@ -16,6 +16,7 @@ from jastg.graph.export import exportar_saidas
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _build_all_results(mini_project_dir: Path, classes_internas, index_nome_simples):
     """Run Pass 2 over all files in the mini project."""
     all_resultados: dict = {}
@@ -27,7 +28,10 @@ def _build_all_results(mini_project_dir: Path, classes_internas, index_nome_simp
         except Exception:
             continue
         res = extrair_dependencias_e_metricas(
-            tree, arquivo_java.name, classes_internas, index_nome_simples,
+            tree,
+            arquivo_java.name,
+            classes_internas,
+            index_nome_simples,
             "test-domain",
         )
         for r in res:
@@ -44,6 +48,7 @@ def _build_all_results(mini_project_dir: Path, classes_internas, index_nome_simp
 # User / User2 inner-class references
 # ---------------------------------------------------------------------------
 
+
 def test_user_inner_ref_resolved(mini_project_dir, classes_internas, index_nome_simples):
     """User.java: 'Foo.Inner' must resolve to 'com.example.Foo$Inner'."""
     source = (mini_project_dir / "com/example/User.java").read_text(encoding="utf-8")
@@ -53,13 +58,11 @@ def test_user_inner_ref_resolved(mini_project_dir, classes_internas, index_nome_
     )
     user = next(r for r in resultados if r["classe"] == "com.example.User")
     assert "com.example.Foo$Inner" in user["arestas_counter"], (
-        f"Foo.Inner not resolved to Foo$Inner. Deps: "
-        f"{set(user['arestas_counter'].keys())}"
+        f"Foo.Inner not resolved to Foo$Inner. Deps: {set(user['arestas_counter'].keys())}"
     )
 
 
-def test_user2_qualified_inner_ref_resolved(mini_project_dir, classes_internas,
-                                             index_nome_simples):
+def test_user2_qualified_inner_ref_resolved(mini_project_dir, classes_internas, index_nome_simples):
     """User2.java: 'com.example.Foo.Inner' must resolve to 'com.example.Foo$Inner'."""
     source = (mini_project_dir / "com/other/User2.java").read_text(encoding="utf-8")
     tree = javalang.parse.parse(source)
@@ -77,9 +80,10 @@ def test_user2_qualified_inner_ref_resolved(mini_project_dir, classes_internas,
 # End-to-end export
 # ---------------------------------------------------------------------------
 
-def test_end_to_end_export_outputs(tmp_path, mini_project_dir,
-                                    classes_internas, index_nome_simples,
-                                    total_arquivos):
+
+def test_end_to_end_export_outputs(
+    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
+):
     """All four output files must be created and contain valid content."""
     output_dir = tmp_path / "output"
     all_resultados, all_arestas = _build_all_results(
@@ -87,9 +91,14 @@ def test_end_to_end_export_outputs(tmp_path, mini_project_dir,
     )
 
     n_arestas, meta = exportar_saidas(
-        all_resultados, all_arestas, classes_internas,
-        total_arquivos, 0, output_dir,
-        ponderado=True, direcionado=True,
+        all_resultados,
+        all_arestas,
+        classes_internas,
+        total_arquivos,
+        0,
+        output_dir,
+        ponderado=True,
+        direcionado=True,
     )
 
     assert (output_dir / "classes_com_ids.txt").exists()
@@ -104,18 +113,23 @@ def test_end_to_end_export_outputs(tmp_path, mini_project_dir,
     assert "jastg_version" in meta
 
 
-def test_end_to_end_weighted_format(tmp_path, mini_project_dir,
-                                    classes_internas, index_nome_simples,
-                                    total_arquivos):
+def test_end_to_end_weighted_format(
+    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
+):
     """Weighted output must have exactly 3 columns per line."""
     output_dir = tmp_path / "output_w"
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
     )
     exportar_saidas(
-        all_resultados, all_arestas, classes_internas,
-        total_arquivos, 0, output_dir,
-        ponderado=True, direcionado=True,
+        all_resultados,
+        all_arestas,
+        classes_internas,
+        total_arquivos,
+        0,
+        output_dir,
+        ponderado=True,
+        direcionado=True,
     )
     lines = (output_dir / "grafo_dependencias_ids.txt").read_text().strip().splitlines()
     assert lines, "Graph file must not be empty"
@@ -124,18 +138,23 @@ def test_end_to_end_weighted_format(tmp_path, mini_project_dir,
         assert len(parts) == 3, f"Expected 3 columns (weighted), got: {line!r}"
 
 
-def test_end_to_end_unweighted_format(tmp_path, mini_project_dir,
-                                      classes_internas, index_nome_simples,
-                                      total_arquivos):
+def test_end_to_end_unweighted_format(
+    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
+):
     """Unweighted output must have exactly 2 columns per line."""
     output_dir = tmp_path / "output_uw"
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
     )
     exportar_saidas(
-        all_resultados, all_arestas, classes_internas,
-        total_arquivos, 0, output_dir,
-        ponderado=False, direcionado=True,
+        all_resultados,
+        all_arestas,
+        classes_internas,
+        total_arquivos,
+        0,
+        output_dir,
+        ponderado=False,
+        direcionado=True,
     )
     lines = (output_dir / "grafo_dependencias_ids.txt").read_text().strip().splitlines()
     assert lines, "Graph file must not be empty"
@@ -144,17 +163,21 @@ def test_end_to_end_unweighted_format(tmp_path, mini_project_dir,
         assert len(parts) == 2, f"Expected 2 columns (unweighted), got: {line!r}"
 
 
-def test_end_to_end_metrics_json_valid(tmp_path, mini_project_dir,
-                                       classes_internas, index_nome_simples,
-                                       total_arquivos):
+def test_end_to_end_metrics_json_valid(
+    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
+):
     """metricas_java.json must be valid JSON with expected metric keys."""
     output_dir = tmp_path / "output_m"
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
     )
     exportar_saidas(
-        all_resultados, all_arestas, classes_internas,
-        total_arquivos, 0, output_dir,
+        all_resultados,
+        all_arestas,
+        classes_internas,
+        total_arquivos,
+        0,
+        output_dir,
     )
     data = json.loads((output_dir / "metricas_java.json").read_text())
     assert len(data) == len(all_resultados)
@@ -164,19 +187,17 @@ def test_end_to_end_metrics_json_valid(tmp_path, mini_project_dir,
             assert metric in entry, f"Missing metric {metric!r}"
 
 
-def test_end_to_end_deterministic_ids(tmp_path, mini_project_dir,
-                                      classes_internas, index_nome_simples,
-                                      total_arquivos):
+def test_end_to_end_deterministic_ids(
+    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
+):
     """Running the export twice must produce identical classes_com_ids.txt."""
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
     )
     out1 = tmp_path / "run1"
     out2 = tmp_path / "run2"
-    exportar_saidas(all_resultados, all_arestas, classes_internas,
-                    total_arquivos, 0, out1)
-    exportar_saidas(all_resultados, all_arestas, classes_internas,
-                    total_arquivos, 0, out2)
+    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out1)
+    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out2)
 
     text1 = (out1 / "classes_com_ids.txt").read_text()
     text2 = (out2 / "classes_com_ids.txt").read_text()

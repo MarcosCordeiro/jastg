@@ -83,8 +83,12 @@ def _coletar_tipos_no_corpo(
 
     def _resolver(nome_tipo: str) -> str | None:
         return resolver_tipo(
-            nome_tipo, package, imports_explicitos, imports_wildcard,
-            classes_internas, index_nome_simples,
+            nome_tipo,
+            package,
+            imports_explicitos,
+            imports_wildcard,
+            classes_internas,
+            index_nome_simples,
         )
 
     def _add_tipo(nome_tipo: str) -> None:
@@ -124,9 +128,8 @@ def _coletar_tipos_no_corpo(
             if node.qualifier and isinstance(node.qualifier, str):
                 qual = node.qualifier.strip()
                 if qual:
-                    should_resolve = (
-                        qualifier_heuristic == "off"
-                        or (qualifier_heuristic == "upper" and qual[0].isupper())
+                    should_resolve = qualifier_heuristic == "off" or (
+                        qualifier_heuristic == "upper" and qual[0].isupper()
                     )
                     if should_resolve:
                         resolvido = _resolver(qual)
@@ -159,16 +162,16 @@ def _coletar_tipos_no_corpo(
                 continue
 
     # --- methods: signature (return type + params) then body ---
-    for metodo in (class_decl.methods or []):
+    for metodo in class_decl.methods or []:
         if metodo.return_type:
             _add_tipos_de_type_node(metodo.return_type)
-        for param in (metodo.parameters or []):
+        for param in metodo.parameters or []:
             _add_tipos_de_type_node(param.type)
         _percorrer_corpo(metodo.body)
 
     # --- constructors: signature (params) then body ---
-    for ctor in (class_decl.constructors or []):
-        for param in (ctor.parameters or []):
+    for ctor in class_decl.constructors or []:
+        for param in ctor.parameters or []:
             _add_tipos_de_type_node(param.type)
         _percorrer_corpo(ctor.body)
 
@@ -219,12 +222,10 @@ def extrair_dependencias_e_metricas(
     imports_explicitos, imports_wildcard = _extrair_imports(tree)
     resultados: list[dict] = []
 
-    for tipo_decl in (javalang.tree.ClassDeclaration,
-                      javalang.tree.InterfaceDeclaration):
+    for tipo_decl in (javalang.tree.ClassDeclaration, javalang.tree.InterfaceDeclaration):
         for path_ast, class_decl in tree.filter(tipo_decl):
             nome_simples = _construir_nome_aninhado(path_ast, class_decl)
-            nome_qual = (f"{package}.{nome_simples}"
-                         if package else nome_simples)
+            nome_qual = f"{package}.{nome_simples}" if package else nome_simples
 
             # --- Attributes and LCOM4 ---
             atributos: set[str] = set()
@@ -245,9 +246,13 @@ def extrair_dependencias_e_metricas(
 
             # --- Dependencies (with count) and RFC ---
             dep_counter, rfc_metodos = _coletar_tipos_no_corpo(
-                class_decl, nome_qual, package,
-                imports_explicitos, imports_wildcard,
-                classes_internas, index_nome_simples,
+                class_decl,
+                nome_qual,
+                package,
+                imports_explicitos,
+                imports_wildcard,
+                classes_internas,
+                index_nome_simples,
                 qualifier_heuristic=qualifier_heuristic,
             )
 
@@ -257,18 +262,20 @@ def extrair_dependencias_e_metricas(
             noa = len(atributos)
             chave_com_dominio = f"{dominio}/{nome_qual}"
 
-            resultados.append({
-                "classe": nome_qual,
-                "chave": chave_com_dominio,
-                "arquivo": str(nome_arquivo),
-                "metricas": {
-                    "LCOM4": lcom4_valor,
-                    "CBO": cbo,
-                    "RFC": rfc,
-                    "NOM": nom,
-                    "NOA": noa,
-                },
-                "arestas_counter": dep_counter,
-            })
+            resultados.append(
+                {
+                    "classe": nome_qual,
+                    "chave": chave_com_dominio,
+                    "arquivo": str(nome_arquivo),
+                    "metricas": {
+                        "LCOM4": lcom4_valor,
+                        "CBO": cbo,
+                        "RFC": rfc,
+                        "NOM": nom,
+                        "NOA": noa,
+                    },
+                    "arestas_counter": dep_counter,
+                }
+            )
 
     return resultados

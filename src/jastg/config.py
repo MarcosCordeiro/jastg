@@ -67,10 +67,7 @@ class AnalysisConfig:
             64-character lowercase hex string.
         """
         d = {
-            "domains": [
-                {"name": ds.name, "path": str(ds.path)}
-                for ds in self.domains
-            ],
+            "domains": [{"name": ds.name, "path": str(ds.path)} for ds in self.domains],
             "weighted": self.weighted,
             "directed": self.directed,
             "qualifier_heuristic": self.qualifier_heuristic,

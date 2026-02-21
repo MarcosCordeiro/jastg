@@ -43,8 +43,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="jastg",
         description=(
-            "JASTG – Java AST Structural Graph: "
-            "static dependency analysis for Java codebases."
+            "JASTG – Java AST Structural Graph: static dependency analysis for Java codebases."
         ),
     )
     parser.add_argument(
@@ -62,46 +61,62 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Run the two-pass static analysis and produce output files.",
     )
     analyze.add_argument(
-        "--domain", metavar="NAME",
-        action="append", dest="domains", default=[],
+        "--domain",
+        metavar="NAME",
+        action="append",
+        dest="domains",
+        default=[],
         help="Domain label (repeat for multiple domains).",
     )
     analyze.add_argument(
-        "--path", metavar="PATH",
-        action="append", dest="paths", default=[],
+        "--path",
+        metavar="PATH",
+        action="append",
+        dest="paths",
+        default=[],
         help="Root path to scan for .java files (paired with --domain).",
     )
     analyze.add_argument(
-        "--config", metavar="FILE",
+        "--config",
+        metavar="FILE",
         help="YAML configuration file (alternative to --domain/--path pairs).",
     )
     analyze.add_argument(
         "--weighted",
-        dest="weighted", action="store_true", default=True,
+        dest="weighted",
+        action="store_true",
+        default=True,
         help="Export edge weights as a third column (default: on).",
     )
     analyze.add_argument(
         "--unweighted",
-        dest="weighted", action="store_false",
+        dest="weighted",
+        action="store_false",
         help="Omit edge weights (two-column output).",
     )
     analyze.add_argument(
         "--directed",
-        dest="directed", action="store_true", default=True,
+        dest="directed",
+        action="store_true",
+        default=True,
         help="Directed graph (default: on).",
     )
     analyze.add_argument(
         "--undirected",
-        dest="directed", action="store_false",
+        dest="directed",
+        action="store_false",
         help="Symmetrize edges for undirected algorithms (e.g. Louvain).",
     )
     analyze.add_argument(
-        "--out", metavar="DIR", default="output",
+        "--out",
+        metavar="DIR",
+        default="output",
         help="Output directory (default: output).",
     )
     analyze.add_argument(
         "--qualifier-heuristic",
-        choices=["upper", "off"], default="upper",
+        choices=["upper", "off"],
+        default="upper",
         dest="qualifier_heuristic",
         help=(
             '"upper" (default) resolves only MethodInvocation qualifiers '
@@ -111,12 +126,16 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     analyze.add_argument(
         "--fail-fast",
-        action="store_true", default=False, dest="fail_fast",
+        action="store_true",
+        default=False,
+        dest="fail_fast",
         help="Abort immediately on the first parse error.",
     )
     analyze.add_argument(
-        "--verbose", "-v",
-        action="store_true", default=False,
+        "--verbose",
+        "-v",
+        action="store_true",
+        default=False,
         help="Enable DEBUG-level logging.",
     )
 
@@ -131,11 +150,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _get_version() -> str:
     from jastg import __version__
+
     return __version__
 
 
 def _cmd_analyze(args: argparse.Namespace) -> int:
     from jastg.logging_config import setup_logging
+
     setup_logging(verbose=args.verbose)
 
     from jastg.pipeline import run
@@ -146,8 +167,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
             import yaml  # type: ignore[import]
         except ImportError:
             print(
-                "ERROR: PyYAML is required for --config. "
-                "Install with: pip install pyyaml",
+                "ERROR: PyYAML is required for --config. Install with: pip install pyyaml",
                 file=sys.stderr,
             )
             return 1
@@ -165,8 +185,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     else:
         if not args.domains or not args.paths:
             print(
-                "ERROR: Provide at least one --domain NAME --path PATH pair, "
-                "or use --config FILE.",
+                "ERROR: Provide at least one --domain NAME --path PATH pair, or use --config FILE.",
                 file=sys.stderr,
             )
             return 1
@@ -199,7 +218,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"JASTG {_get_version()}")
     print(f"  Java files:      {metadata['total_arquivos_java']}")
     print(f"  Parse errors:    {metadata['arquivos_com_erro']}")
@@ -210,7 +229,7 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     print(f"  Run date:        {metadata['data_execucao']}")
     if metadata.get("commit_hash"):
         print(f"  Commit:          {metadata['commit_hash'][:12]}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"\nOutputs written to: {output_dir}/")
     return 0
 
@@ -219,6 +238,7 @@ def _cmd_doctor() -> int:
     import platform
 
     from jastg import __version__
+
     print(f"jastg        {__version__}")
     print(f"Python       {sys.version}")
     print(f"Platform     {platform.platform()}")
@@ -226,6 +246,7 @@ def _cmd_doctor() -> int:
     def _check(pkg: str) -> None:
         try:
             from importlib.metadata import version
+
             print(f"{pkg:<12} {version(pkg)}")
         except Exception as exc:
             print(f"{pkg:<12} ERROR – {exc}")

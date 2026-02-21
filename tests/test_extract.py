@@ -13,6 +13,7 @@ from jastg.extract import extrair_dependencias_e_metricas
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _parse_file(mini_project_dir: Path, rel_path: str):
     source = (mini_project_dir / rel_path).read_text(encoding="utf-8")
     return javalang.parse.parse(source)
@@ -20,16 +21,14 @@ def _parse_file(mini_project_dir: Path, rel_path: str):
 
 def _get_class(resultados, qual_name: str) -> dict:
     matches = [r for r in resultados if r["classe"] == qual_name]
-    assert matches, (
-        f"{qual_name!r} not found. Available: "
-        f"{[r['classe'] for r in resultados]}"
-    )
+    assert matches, f"{qual_name!r} not found. Available: {[r['classe'] for r in resultados]}"
     return matches[0]
 
 
 # ---------------------------------------------------------------------------
 # Foo extraction
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="module")
 def resultados_foo(mini_project_dir, classes_internas, index_nome_simples):
@@ -81,6 +80,7 @@ def test_extract_dependencies_foo_no_self_reference(resultados_foo):
 # Inner class
 # ---------------------------------------------------------------------------
 
+
 def test_inner_and_deep_inner(resultados_foo):
     """Foo$Inner and Foo$Inner$Deep must have their own dependencies."""
     inner = _get_class(resultados_foo, "com.example.Foo$Inner")
@@ -96,14 +96,13 @@ def test_inner_and_deep_inner(resultados_foo):
 def test_deep_inner_noa(resultados_foo):
     """Foo$Inner$Deep must have NOA=1 (one field: deepRef)."""
     deep = _get_class(resultados_foo, "com.example.Foo$Inner$Deep")
-    assert deep["metricas"]["NOA"] == 1, (
-        f"Deep NOA expected 1, got {deep['metricas']['NOA']}"
-    )
+    assert deep["metricas"]["NOA"] == 1, f"Deep NOA expected 1, got {deep['metricas']['NOA']}"
 
 
 # ---------------------------------------------------------------------------
 # Static import ignored
 # ---------------------------------------------------------------------------
+
 
 def test_static_import_ignored(mini_project_dir):
     """Static import must not appear in the explicit import set."""
@@ -114,14 +113,13 @@ def test_static_import_ignored(mini_project_dir):
     imp_expl, imp_wc = _extrair_imports(tree)
 
     assert "com.other.Helper" in imp_expl, "Helper should be in explicit imports"
-    assert "com.other.Helper.staticMethod" not in imp_expl, (
-        "Static import must be filtered out"
-    )
+    assert "com.other.Helper.staticMethod" not in imp_expl, "Static import must be filtered out"
 
 
 # ---------------------------------------------------------------------------
 # Edge weights (no double-counting)
 # ---------------------------------------------------------------------------
+
 
 def test_edge_weights_no_double_count(resultados_foo):
     """Verify occurrence-based weights for Foo→Qux and Foo→Bar.
@@ -139,19 +137,16 @@ def test_edge_weights_no_double_count(resultados_foo):
     foo = _get_class(resultados_foo, "com.example.Foo")
 
     peso_qux = foo["arestas_counter"].get("com.example.Qux", 0)
-    assert peso_qux == 4, (
-        f"Foo→Qux weight expected 4 (field+param+localvar+cast), got {peso_qux}"
-    )
+    assert peso_qux == 4, f"Foo→Qux weight expected 4 (field+param+localvar+cast), got {peso_qux}"
 
     peso_bar = foo["arestas_counter"].get("com.example.Bar", 0)
-    assert peso_bar == 3, (
-        f"Foo→Bar weight expected 3 (extends+localvar+creator), got {peso_bar}"
-    )
+    assert peso_bar == 3, f"Foo→Bar weight expected 3 (extends+localvar+creator), got {peso_bar}"
 
 
 # ---------------------------------------------------------------------------
 # Bar extraction
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="module")
 def resultados_bar(mini_project_dir, classes_internas, index_nome_simples):
@@ -173,6 +168,7 @@ def test_bar_depends_on_foo(resultados_bar):
 # Helper cross-package
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="module")
 def resultados_helper(mini_project_dir, classes_internas, index_nome_simples):
     tree = _parse_file(mini_project_dir, "com/other/Helper.java")
@@ -184,14 +180,13 @@ def resultados_helper(mini_project_dir, classes_internas, index_nome_simples):
 def test_helper_cross_package_import(resultados_helper):
     """Helper must resolve Foo via explicit cross-package import."""
     helper = _get_class(resultados_helper, "com.other.Helper")
-    assert "com.example.Foo" in helper["arestas_counter"], (
-        "Helper: missing import Foo"
-    )
+    assert "com.example.Foo" in helper["arestas_counter"], "Helper: missing import Foo"
 
 
 # ---------------------------------------------------------------------------
 # OO metrics
 # ---------------------------------------------------------------------------
+
 
 def test_foo_metrics(resultados_foo):
     """Verify CBO, NOM, NOA for Foo."""

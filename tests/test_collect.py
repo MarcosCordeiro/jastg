@@ -16,9 +16,7 @@ def test_collect_internal_classes(classes_internas, total_arquivos):
         "com.example.Foo$Inner",
         "com.example.Foo$Inner$Deep",
     }
-    assert expected <= classes_internas, (
-        f"Missing classes: {expected - classes_internas}"
-    )
+    assert expected <= classes_internas, f"Missing classes: {expected - classes_internas}"
 
 
 def test_inner_class_registered(classes_internas):

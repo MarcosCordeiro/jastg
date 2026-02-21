@@ -69,12 +69,10 @@ def coletar_classes_internas(
                     package = node.name
                     break
 
-            for tipo_decl in (javalang.tree.ClassDeclaration,
-                              javalang.tree.InterfaceDeclaration):
+            for tipo_decl in (javalang.tree.ClassDeclaration, javalang.tree.InterfaceDeclaration):
                 for path_ast, decl in tree.filter(tipo_decl):
                     nome_simples = _construir_nome_aninhado(path_ast, decl)
-                    nome_qual = (f"{package}.{nome_simples}"
-                                 if package else nome_simples)
+                    nome_qual = f"{package}.{nome_simples}" if package else nome_simples
                     classes_internas.add(nome_qual)
                     dominio_por_classe[nome_qual] = dominio
 

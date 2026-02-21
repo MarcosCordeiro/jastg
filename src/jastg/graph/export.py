@@ -34,7 +34,9 @@ def _obter_commit_hash() -> str | None:
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0:
             return result.stdout.strip()
@@ -47,6 +49,7 @@ def _pkg_version(pkg: str) -> str:
     """Return the installed version of *pkg*, or ``"unknown"``."""
     try:
         from importlib.metadata import version
+
         return version(pkg)
     except Exception:
         return "unknown"
@@ -115,8 +118,7 @@ def exportar_saidas(
 
     # --- ID mapping: sorted for determinism ---
     nome_para_id: dict[str, int] = {
-        nome: idx + 1
-        for idx, nome in enumerate(sorted(resultados.keys()))
+        nome: idx + 1 for idx, nome in enumerate(sorted(resultados.keys()))
     }
 
     # --- classes_com_ids.txt ---
@@ -128,7 +130,7 @@ def exportar_saidas(
     qual_para_chave: dict[str, str] = {}
     for chave in resultados:
         pos = chave.index("/")
-        nome_qual = chave[pos + 1:]
+        nome_qual = chave[pos + 1 :]
         qual_para_chave[nome_qual] = chave
 
     # --- Convert edges to numeric IDs with weights ---
@@ -158,14 +160,14 @@ def exportar_saidas(
 
     # --- metricas_java.json ---
     resultados_com_ids = {
-        nome: {"id": nome_para_id[nome], **metricas}
-        for nome, metricas in resultados.items()
+        nome: {"id": nome_para_id[nome], **metricas} for nome, metricas in resultados.items()
     }
     with open(output_dir / "metricas_java.json", "w", encoding="utf-8") as f:
         json.dump(resultados_com_ids, f, indent=2, ensure_ascii=False)
 
     # --- grafo_metadata.json ---
     from jastg import __version__ as jastg_version  # avoid circular at module level
+
     commit_hash = _obter_commit_hash()
     metadata = {
         "jastg_version": jastg_version,
@@ -188,6 +190,8 @@ def exportar_saidas(
 
     logger.info(
         "Outputs written to %s  (classes=%d, edges=%d)",
-        output_dir, len(resultados), arestas_escritas,
+        output_dir,
+        len(resultados),
+        arestas_escritas,
     )
     return arestas_escritas, metadata

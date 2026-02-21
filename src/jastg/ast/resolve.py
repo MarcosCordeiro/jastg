@@ -25,9 +25,9 @@ def _construir_nome_aninhado(path_ast, decl) -> str:
         Simple name string with ``$`` separators for inner-class nesting.
     """
     outer_classes = [
-        n for n in path_ast
-        if isinstance(n, (javalang.tree.ClassDeclaration,
-                          javalang.tree.InterfaceDeclaration))
+        n
+        for n in path_ast
+        if isinstance(n, (javalang.tree.ClassDeclaration, javalang.tree.InterfaceDeclaration))
     ]
     if outer_classes:
         cadeia = "$".join(n.name for n in outer_classes)
@@ -119,9 +119,12 @@ def resolver_tipo(
             # e.g. "Outer.Inner" → "Outer$Inner", then re-resolve
             candidato_inner = f"{partes[0]}${partes[1]}"
             resultado = resolver_tipo(
-                candidato_inner, package,
-                imports_explicitos, imports_wildcard,
-                classes_internas, index_nome_simples,
+                candidato_inner,
+                package,
+                imports_explicitos,
+                imports_wildcard,
+                classes_internas,
+                index_nome_simples,
             )
             if resultado:
                 return resultado
