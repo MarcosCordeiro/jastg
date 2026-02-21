@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# ---------------------------------------------------------------------------
+# Project metadata
+# ---------------------------------------------------------------------------
+[project]
+name = "jastg"
+version = "1.0.0"
+description = "Java AST Structural Graph – static structural dependency analysis for Java codebases"
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Marcos Rogério Lótici Alves", email = "marcos.alves@example.com" },
+]
+keywords = [
+    "java", "ast", "dependency-graph", "software-metrics",
+    "static-analysis", "coupling", "cohesion",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "javalang>=0.13.0",
+    "networkx>=2.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+]
+yaml = [
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+jastg = "jastg.cli:main"
+
+[project.urls]
+Homepage    = "https://github.com/YOUR_USER/jastg"
+Repository  = "https://github.com/YOUR_USER/jastg"
+Issues      = "https://github.com/YOUR_USER/jastg/issues"
+Changelog   = "https://github.com/YOUR_USER/jastg/releases"
+
+# ---------------------------------------------------------------------------
+# Build configuration
+# ---------------------------------------------------------------------------
+[tool.hatch.build.targets.wheel]
+packages = ["src/jastg"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "tests/",
+    "examples/",
+    "LICENSE.txt",
+    "README.md",
+    "CITATION.cff",
+]
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths   = ["tests"]
+addopts     = "-v --tb=short"
+
+# ---------------------------------------------------------------------------
+# Ruff (lint + format)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+src            = ["src"]
+line-length    = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "PT"]
+ignore = [
+    "E501",   # line too long – handled by formatter
+    "B904",   # raise-without-from – acceptable in CLI
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PT"]   # allow plain assert in pytest
+
+[tool.ruff.format]
+quote-style = "double"

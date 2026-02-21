@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: >
+  If you use JASTG in your research, please cite it using the metadata below.
+
+title: "JASTG: Java AST Structural Graph"
+version: "1.0.0"
+date-released: "2024-01-01"
+
+authors:
+  - family-names: "Alves"
+    given-names: "Marcos Rogério Lótici"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+    affiliation: "Universidade Presbiteriana Mackenzie"
+
+repository-code: "https://github.com/YOUR_USER/jastg"
+url: "https://github.com/YOUR_USER/jastg"
+license: MIT
+
+abstract: >
+  JASTG (Java AST Structural Graph) is a Python package for static structural
+  dependency analysis of Java codebases. It extracts class-level dependencies
+  (extends, implements, field types, method signatures, constructors, local
+  variables, casts, and ClassCreators) from Java source files using the
+  javalang AST parser, without requiring a JVM or classpath. It computes
+  object-oriented coupling and cohesion metrics (CBO, RFC, NOM, NOA, LCOM4)
+  and exports the dependency graph in formats compatible with graph analysis
+  tools such as NetworkX, Gephi, and community detection algorithms.
+
+keywords:
+  - java
+  - ast
+  - static-analysis
+  - dependency-graph
+  - software-metrics
+  - coupling
+  - cohesion
+  - software-engineering
