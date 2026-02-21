@@ -343,7 +343,7 @@ If you use JASTG in your research, please cite:
   title     = {{JASTG}: {Java AST Structural Graph}},
   year      = {2024},
   version   = {1.0.0},
-  url       = {https://github.com/YOUR_USER/jastg},
+  url       = {https://github.com/MarcosCordeiro/jastg},
   license   = {MIT}
 }
 ```

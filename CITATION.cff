@@ -4,16 +4,16 @@ message: >
 
 title: "JASTG: Java AST Structural Graph"
 version: "1.0.0"
-date-released: "2024-01-01"
+date-released: "2026-02-21"
 
 authors:
-  - family-names: "Alves"
-    given-names: "Marcos Rogério Lótici"
-    orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: "Brito Jr"
+    given-names: "Marcos"
+    orcid: "https://orcid.org/0009-0000-2482-976X"
     affiliation: "Universidade Presbiteriana Mackenzie"
 
-repository-code: "https://github.com/YOUR_USER/jastg"
-url: "https://github.com/YOUR_USER/jastg"
+repository-code: "https://github.com/MarcosCordeiro/jastg"
+url: "https://github.com/MarcosCordeiro/jastg"
 license: MIT
 
 abstract: >
