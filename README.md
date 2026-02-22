@@ -95,7 +95,7 @@ pip install jastg
 **From source (editable install for development):**
 
 ```bash
-git clone https://github.com/YOUR_USER/jastg.git
+git clone https://github.com/MarcosCordeiro/jastg.git
 cd jastg
 pip install -e ".[dev]"
 ```

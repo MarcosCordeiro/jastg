@@ -50,10 +50,10 @@ yaml = [
 jastg = "jastg.cli:main"
 
 [project.urls]
-Homepage    = "https://github.com/YOUR_USER/jastg"
-Repository  = "https://github.com/YOUR_USER/jastg"
-Issues      = "https://github.com/YOUR_USER/jastg/issues"
-Changelog   = "https://github.com/YOUR_USER/jastg/releases"
+Homepage    = "https://github.com/MarcosCordeiro/jastg"
+Repository  = "https://github.com/MarcosCordeiro/jastg"
+Issues      = "https://github.com/MarcosCordeiro/jastg/issues"
+Changelog   = "https://github.com/MarcosCordeiro/jastg/releases"
 
 # ---------------------------------------------------------------------------
 # Build configuration
