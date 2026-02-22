@@ -5,7 +5,7 @@ Orchestrates the two-pass analysis:
 1. **Pass 1** – collect all internal class names across all domains.
 2. **Pass 2** – parse each file again to extract metrics and dependencies.
 
-Then exports all four output files via :mod:`jastg.graph.export`.
+Then exports all output files via :mod:`jastg.graph.export`.
 
 This module is the single public entry point for programmatic use::
 
@@ -51,10 +51,10 @@ def run(
         dominios: List of domain labels, one per entry in *caminhos*.
         caminhos: List of root paths to scan for ``.java`` files.
         ponderado: If ``True`` (default), write edge weights as the third
-            column in ``grafo_dependencias_ids.txt``.
+            column of the graph edge set.
         direcionado: If ``True`` (default), produce a directed graph.
             If ``False``, symmetrize by summing reciprocal edge weights.
-        output_dir: Directory to write the four output files into
+        output_dir: Directory to write the output files into
             (created if absent).  Defaults to ``"output"``.
         qualifier_heuristic: ``"upper"`` (default) – only ``MethodInvocation``
             qualifiers starting with an uppercase letter are resolved
@@ -64,7 +64,8 @@ def run(
             in Pass 2 instead of logging and continuing.
 
     Returns:
-        The metadata :class:`dict` written to ``grafo_metadata.json``.
+        The metadata :class:`dict` written to ``grafo_metadata.json`` and
+        embedded in ``graph.graphml``.
 
     Raises:
         ValueError: If *dominios* and *caminhos* have different lengths.
@@ -135,6 +136,8 @@ def run(
                         arestas_globais[(origem, destino)] += peso
 
     # ── Export ────────────────────────────────────────────────────────────────
+    domain_label = "_".join(dominios)
+    domain_subdir = Path(output_dir) / domain_label
     logger.info("Generating output files...")
     _arestas_escritas, metadata = exportar_saidas(
         resultados,
@@ -142,7 +145,8 @@ def run(
         classes_internas,
         total_arquivos,
         erros,
-        config.output_dir,
+        domain_subdir,
+        domain_label,
         ponderado=ponderado,
         direcionado=direcionado,
         config_hash=config.config_hash(),
@@ -150,8 +154,8 @@ def run(
 
     logger.info(
         "Done. classes=%d  edges=%d  errors=%d",
-        metadata["numero_classes"],
-        metadata["numero_arestas"],
+        metadata["num_classes"],
+        metadata["num_edges"],
         erros,
     )
 

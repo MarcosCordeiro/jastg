@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from collections import Counter
 from pathlib import Path
 
@@ -84,7 +83,7 @@ def test_user2_qualified_inner_ref_resolved(mini_project_dir, classes_internas, 
 def test_end_to_end_export_outputs(
     tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
 ):
-    """All four output files must be created and contain valid content."""
+    """Output files must be created and contain valid content."""
     output_dir = tmp_path / "output"
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
@@ -97,27 +96,28 @@ def test_end_to_end_export_outputs(
         total_arquivos,
         0,
         output_dir,
+        "test-domain",
         ponderado=True,
         direcionado=True,
     )
 
-    assert (output_dir / "classes_com_ids.txt").exists()
-    assert (output_dir / "grafo_dependencias_ids.txt").exists()
-    assert (output_dir / "metricas_java.json").exists()
-    assert (output_dir / "grafo_metadata.json").exists()
+    assert (output_dir / "metadata_test-domain.json").exists()
+    assert (output_dir / "graph_test-domain.graphml").exists()
 
-    assert meta["numero_classes"] == len(all_resultados)
-    assert meta["ponderado"] is True
-    assert meta["direcionado"] is True
-    assert meta["arquivos_com_erro"] == 0
+    assert meta["num_classes"] == len(all_resultados)
+    assert meta["weighted"] is True
+    assert meta["directed"] is True
+    assert meta["parse_errors"] == 0
     assert "jastg_version" in meta
 
 
-def test_end_to_end_weighted_format(
+def test_end_to_end_graphml(
     tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
 ):
-    """Weighted output must have exactly 3 columns per line."""
-    output_dir = tmp_path / "output_w"
+    """graph.graphml must be a valid GraphML file with nodes and edges."""
+    import networkx as nx
+
+    output_dir = tmp_path / "output_gml"
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
     )
@@ -128,80 +128,47 @@ def test_end_to_end_weighted_format(
         total_arquivos,
         0,
         output_dir,
+        "test-domain",
         ponderado=True,
         direcionado=True,
     )
-    lines = (output_dir / "grafo_dependencias_ids.txt").read_text().strip().splitlines()
-    assert lines, "Graph file must not be empty"
-    for line in lines:
-        parts = line.split()
-        assert len(parts) == 3, f"Expected 3 columns (weighted), got: {line!r}"
+    graphml_path = output_dir / "graph_test-domain.graphml"
+    assert graphml_path.exists(), "graph_test-domain.graphml must be created"
 
-
-def test_end_to_end_unweighted_format(
-    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
-):
-    """Unweighted output must have exactly 2 columns per line."""
-    output_dir = tmp_path / "output_uw"
-    all_resultados, all_arestas = _build_all_results(
-        mini_project_dir, classes_internas, index_nome_simples
-    )
-    exportar_saidas(
-        all_resultados,
-        all_arestas,
-        classes_internas,
-        total_arquivos,
-        0,
-        output_dir,
-        ponderado=False,
-        direcionado=True,
-    )
-    lines = (output_dir / "grafo_dependencias_ids.txt").read_text().strip().splitlines()
-    assert lines, "Graph file must not be empty"
-    for line in lines:
-        parts = line.split()
-        assert len(parts) == 2, f"Expected 2 columns (unweighted), got: {line!r}"
-
-
-def test_end_to_end_metrics_json_valid(
-    tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
-):
-    """metricas_java.json must be valid JSON with expected metric keys."""
-    output_dir = tmp_path / "output_m"
-    all_resultados, all_arestas = _build_all_results(
-        mini_project_dir, classes_internas, index_nome_simples
-    )
-    exportar_saidas(
-        all_resultados,
-        all_arestas,
-        classes_internas,
-        total_arquivos,
-        0,
-        output_dir,
-    )
-    data = json.loads((output_dir / "metricas_java.json").read_text())
-    assert len(data) == len(all_resultados)
-    for _key, entry in data.items():
-        assert "id" in entry
+    G = nx.read_graphml(graphml_path)
+    assert G.number_of_nodes() == len(all_resultados)
+    assert G.number_of_edges() > 0
+    # Every node must carry a label and OO metrics
+    for _nid, attrs in G.nodes(data=True):
+        assert "label" in attrs
         for metric in ("LCOM4", "CBO", "RFC", "NOM", "NOA"):
-            assert metric in entry, f"Missing metric {metric!r}"
+            assert metric in attrs, f"Node missing metric {metric!r}"
+    # Every edge must carry a weight
+    for _u, _v, attrs in G.edges(data=True):
+        assert "weight" in attrs
+    # Graph-level metadata must be present
+    for key in ("jastg_version", "run_date", "num_classes", "num_edges", "directed", "weighted"):
+        assert key in G.graph, f"Graph metadata missing key {key!r}"
 
 
 def test_end_to_end_deterministic_ids(
     tmp_path, mini_project_dir, classes_internas, index_nome_simples, total_arquivos
 ):
-    """Running the export twice must produce identical classes_com_ids.txt."""
+    """Running the export twice must produce identical GraphML node/edge sets."""
+    import networkx as nx
+
     all_resultados, all_arestas = _build_all_results(
         mini_project_dir, classes_internas, index_nome_simples
     )
     out1 = tmp_path / "run1"
     out2 = tmp_path / "run2"
-    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out1)
-    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out2)
+    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out1, "test-domain")
+    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out2, "test-domain")
 
-    text1 = (out1 / "classes_com_ids.txt").read_text()
-    text2 = (out2 / "classes_com_ids.txt").read_text()
-    assert text1 == text2, "ID mapping must be deterministic across runs"
+    G1 = nx.read_graphml(out1 / "graph_test-domain.graphml")
+    G2 = nx.read_graphml(out2 / "graph_test-domain.graphml")
+    assert set(G1.nodes()) == set(G2.nodes()), "Node sets must be identical across runs"
+    assert set(G1.edges()) == set(G2.edges()), "Edge sets must be identical across runs"
 
 
 def test_pipeline_run(tmp_path, mini_project_dir):
@@ -216,13 +183,17 @@ def test_pipeline_run(tmp_path, mini_project_dir):
         output_dir=str(tmp_path / "pipeline_out"),
     )
 
-    assert meta["numero_classes"] > 0
-    assert meta["numero_arestas"] > 0
-    assert meta["arquivos_com_erro"] == 0
-    assert meta["ponderado"] is True
-    assert meta["direcionado"] is True
+    assert meta["num_classes"] > 0
+    assert meta["num_edges"] > 0
+    assert meta["parse_errors"] == 0
+    assert meta["weighted"] is True
+    assert meta["directed"] is True
     assert "jastg_version" in meta
     assert "config_hash" in meta
+
+    domain_dir = tmp_path / "pipeline_out" / "test-domain"
+    assert domain_dir.is_dir(), "Domain subdirectory must be created"
+    assert (domain_dir / "metadata_test-domain.json").exists()
 
 
 def test_pipeline_mismatched_lengths(tmp_path):

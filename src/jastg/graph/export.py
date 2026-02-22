@@ -1,11 +1,9 @@
 """Graph export: symmetrization, ID mapping, and output file generation.
 
-Produces four deterministic output files:
+Produces two deterministic output files (both named with the domain label):
 
-* ``classes_com_ids.txt``        – numeric ID, domain/package.Class
-* ``grafo_dependencias_ids.txt`` – ID_SRC ID_DST [WEIGHT]
-* ``metricas_java.json``         – OO metrics per class, keyed by domain/class
-* ``grafo_metadata.json``        – run provenance and configuration
+* ``metadata_{domain}.json`` – run provenance and configuration
+* ``graph_{domain}.graphml`` – GraphML graph with node metrics and edge weights (Gephi-ready)
 
 IDs are assigned by alphabetical sort of the ``domain/class`` keys, so the
 mapping is deterministic for the same input regardless of traversal order.
@@ -21,6 +19,8 @@ import sys
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+
+import networkx as nx
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +86,12 @@ def exportar_saidas(
     total_arquivos: int,
     erros: int,
     output_dir: Path,
+    domain: str,
     ponderado: bool = True,
     direcionado: bool = True,
     config_hash: str | None = None,
 ) -> tuple[int, dict]:
-    """Generate all four output files for a completed analysis run.
+    """Generate all output files for a completed analysis run.
 
     Args:
         resultados: Mapping ``domain/qualified_name → metrics_dict``.
@@ -102,7 +103,8 @@ def exportar_saidas(
         erros: Number of files that failed to parse.
         output_dir: :class:`~pathlib.Path` to write output files into.
             Created (with parents) if it does not exist.
-        ponderado: If ``True``, write edge weight as third column.
+        domain: Domain label used as a suffix in output file names.
+        ponderado: If ``True``, include edge weights in the graph.
         direcionado: If ``True``, emit directed edges; if ``False``,
             symmetrize with :func:`gerar_grafo_nao_direcionado`.
         config_hash: Optional SHA-256 hex digest of the run configuration
@@ -110,8 +112,15 @@ def exportar_saidas(
 
     Returns:
         Tuple ``(edges_written, metadata_dict)`` where *edges_written* is
-        the number of lines in ``grafo_dependencias_ids.txt`` and
-        *metadata_dict* is the object written to ``grafo_metadata.json``.
+        the number of edges in the graph and *metadata_dict* is the object
+        written to ``metadata_{domain}.json``.
+
+    Output files
+    ------------
+    * ``metadata_{domain}.json`` – run provenance and configuration.
+    * ``graph_{domain}.graphml`` – GraphML file with node labels, OO metrics as
+      node attributes, and optional edge weights.  Ready for direct import
+      into Gephi or any other GraphML-compatible tool.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -120,11 +129,6 @@ def exportar_saidas(
     nome_para_id: dict[str, int] = {
         nome: idx + 1 for idx, nome in enumerate(sorted(resultados.keys()))
     }
-
-    # --- classes_com_ids.txt ---
-    with open(output_dir / "classes_com_ids.txt", "w", encoding="utf-8") as f:
-        for nome, idx in nome_para_id.items():
-            f.write(f"{idx} {nome}\n")
 
     # --- Map qual_name → domain/qual key ---
     qual_para_chave: dict[str, str] = {}
@@ -148,45 +152,43 @@ def exportar_saidas(
     if not direcionado:
         arestas_ids = gerar_grafo_nao_direcionado(arestas_ids)
 
-    # --- grafo_dependencias_ids.txt ---
-    arestas_escritas = 0
-    with open(output_dir / "grafo_dependencias_ids.txt", "w", encoding="utf-8") as f:
-        for (id_a, id_b), peso in sorted(arestas_ids.items()):
-            if ponderado:
-                f.write(f"{id_a} {id_b} {peso}\n")
-            else:
-                f.write(f"{id_a} {id_b}\n")
-            arestas_escritas += 1
-
-    # --- metricas_java.json ---
-    resultados_com_ids = {
-        nome: {"id": nome_para_id[nome], **metricas} for nome, metricas in resultados.items()
-    }
-    with open(output_dir / "metricas_java.json", "w", encoding="utf-8") as f:
-        json.dump(resultados_com_ids, f, indent=2, ensure_ascii=False)
+    arestas_escritas = len(arestas_ids)
 
     # --- grafo_metadata.json ---
     from jastg import __version__ as jastg_version  # avoid circular at module level
 
     commit_hash = _obter_commit_hash()
     metadata = {
+        "output_dir": str(output_dir),
         "jastg_version": jastg_version,
         "python_version": sys.version,
         "platform": platform.platform(),
         "javalang_version": _pkg_version("javalang"),
         "networkx_version": _pkg_version("networkx"),
         "config_hash": config_hash,
-        "data_execucao": datetime.now(timezone.utc).isoformat(),
+        "run_date": datetime.now(timezone.utc).isoformat(),
         "commit_hash": commit_hash,
-        "numero_classes": len(resultados),
-        "numero_arestas": arestas_escritas,
-        "total_arquivos_java": total_arquivos,
-        "arquivos_com_erro": erros,
-        "direcionado": direcionado,
-        "ponderado": ponderado,
+        "num_classes": len(resultados),
+        "num_edges": arestas_escritas,
+        "total_java_files": total_arquivos,
+        "parse_errors": erros,
+        "directed": direcionado,
+        "weighted": ponderado,
     }
-    with open(output_dir / "grafo_metadata.json", "w", encoding="utf-8") as f:
+    with open(output_dir / f"metadata_{domain}.json", "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+    # --- graph_{domain}.graphml ---
+    G: nx.DiGraph | nx.Graph = nx.DiGraph() if direcionado else nx.Graph()
+    for nome, metricas in resultados.items():
+        G.add_node(str(nome_para_id[nome]), label=nome, **metricas)
+    for (id_a, id_b), peso in sorted(arestas_ids.items()):
+        if ponderado:
+            G.add_edge(str(id_a), str(id_b), weight=peso)
+        else:
+            G.add_edge(str(id_a), str(id_b))
+    G.graph.update({k: v for k, v in metadata.items() if v is not None})
+    nx.write_graphml(G, output_dir / f"graph_{domain}.graphml")
 
     logger.info(
         "Outputs written to %s  (classes=%d, edges=%d)",

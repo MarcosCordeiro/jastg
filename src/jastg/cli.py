@@ -220,17 +220,17 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
 
     print(f"\n{'=' * 60}")
     print(f"JASTG {_get_version()}")
-    print(f"  Java files:      {metadata['total_arquivos_java']}")
-    print(f"  Parse errors:    {metadata['arquivos_com_erro']}")
-    print(f"  Classes:         {metadata['numero_classes']}")
-    print(f"  Edges:           {metadata['numero_arestas']}")
-    print(f"  Directed:        {metadata['direcionado']}")
-    print(f"  Weighted:        {metadata['ponderado']}")
-    print(f"  Run date:        {metadata['data_execucao']}")
+    print(f"  Java files:      {metadata['total_java_files']}")
+    print(f"  Parse errors:    {metadata['parse_errors']}")
+    print(f"  Classes:         {metadata['num_classes']}")
+    print(f"  Edges:           {metadata['num_edges']}")
+    print(f"  Directed:        {metadata['directed']}")
+    print(f"  Weighted:        {metadata['weighted']}")
+    print(f"  Run date:        {metadata['run_date']}")
     if metadata.get("commit_hash"):
         print(f"  Commit:          {metadata['commit_hash'][:12]}")
     print(f"{'=' * 60}")
-    print(f"\nOutputs written to: {output_dir}/")
+    print(f"\nOutputs written to: {metadata['output_dir']}/")
     return 0
 
 

@@ -221,83 +221,46 @@ results = extrair_dependencias_e_metricas(tree, "MyClass.java", classes, index, 
 
 ## Output formats
 
-All files are written to `--out` (default `output/`).
+All files are written to `--out/<domain>/` (default `output/<domain>/`).
 
-### `classes_com_ids.txt`
+### `metadata_{domain}.json`
 
-One line per class.  Numeric ID followed by `domain/package.Class`:
-
-```
-1 example/com.example.Bar
-2 example/com.example.Baz
-3 example/com.example.Foo
-4 example/com.example.Foo$Inner
-5 example/com.example.Foo$Inner$Deep
-```
-
-IDs are assigned by alphabetical sort of `domain/class` strings and are
-**deterministic** for a fixed input.
-
-### `grafo_dependencias_ids.txt`
-
-One edge per line.  Weighted (default):
-
-```
-3 1 3
-3 2 1
-3 4 2
-```
-
-Unweighted (`--unweighted`):
-
-```
-3 1
-3 2
-3 4
-```
-
-Undirected (`--undirected`): pairs are written as `(min_id, max_id)` and
-reciprocal weights are summed.
-
-### `metricas_java.json`
-
-JSON object keyed by `domain/package.Class`:
+Run provenance for reproducibility (e.g. `metadata_myapp.json`):
 
 ```json
 {
-  "example/com.example.Foo": {
-    "id": 3,
-    "LCOM4": 1,
-    "CBO": 4,
-    "RFC": 6,
-    "NOM": 1,
-    "NOA": 2
-  }
-}
-```
-
-### `grafo_metadata.json`
-
-Run provenance for reproducibility:
-
-```json
-{
+  "output_dir": "output/myapp",
   "jastg_version": "1.0.0",
   "python_version": "3.12.0 ...",
   "platform": "Linux-6.x...",
   "javalang_version": "0.13.0",
   "networkx_version": "3.3",
   "config_hash": "sha256hex...",
-  "data_execucao": "2026-02-21T12:00:00+00:00",
+  "run_date": "2026-02-22T12:00:00+00:00",
   "commit_hash": "abc123...",
-  "numero_classes": 9,
-  "numero_arestas": 12,
-  "total_arquivos_java": 7,
-  "arquivos_com_erro": 0,
-  "direcionado": true,
-  "ponderado": true
+  "num_classes": 9,
+  "num_edges": 12,
+  "total_java_files": 7,
+  "parse_errors": 0,
+  "directed": true,
+  "weighted": true
 }
 ```
+
+### `graph_{domain}.graphml`
+
+GraphML file ready for import into Gephi or any GraphML-compatible tool
+(e.g. `graph_myapp.graphml`).
+
+- **Nodes** – one per class, with attributes:
+  - `label`: `domain/package.Class` string
+  - `LCOM4`, `CBO`, `RFC`, `NOM`, `NOA`: OO metrics
+- **Edges** – one per dependency pair, with optional `weight` attribute
+  (present when `--weighted`, absent when `--unweighted`).
+  Undirected mode (`--undirected`) symmetrizes pairs as `(min_id, max_id)`
+  and sums reciprocal weights.
+- **Graph-level metadata** – all fields from `metadata_{domain}.json` are
+  embedded directly in the GraphML `<graph>` element.
 
 ---
 
@@ -305,7 +268,7 @@ Run provenance for reproducibility:
 
 - **IDs** are assigned by alphabetical sort of `domain/class` keys, so they
   are identical across runs given the same input.
-- **`config_hash`** in `grafo_metadata.json` is a SHA-256 digest of the
+- **`config_hash`** in `metadata_{domain}.json` is a SHA-256 digest of the
   effective configuration (domains, paths, graph mode, qualifier heuristic).
   Two runs with the same config hash on the same source tree should produce
   identical graphs.
