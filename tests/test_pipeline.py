@@ -162,8 +162,12 @@ def test_end_to_end_deterministic_ids(
     )
     out1 = tmp_path / "run1"
     out2 = tmp_path / "run2"
-    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out1, "test-domain")
-    exportar_saidas(all_resultados, all_arestas, classes_internas, total_arquivos, 0, out2, "test-domain")
+    exportar_saidas(
+        all_resultados, all_arestas, classes_internas, total_arquivos, 0, out1, "test-domain"
+    )
+    exportar_saidas(
+        all_resultados, all_arestas, classes_internas, total_arquivos, 0, out2, "test-domain"
+    )
 
     G1 = nx.read_graphml(out1 / "graph_test-domain.graphml")
     G2 = nx.read_graphml(out2 / "graph_test-domain.graphml")
