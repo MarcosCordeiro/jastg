@@ -2,6 +2,12 @@
 
 **Static structural dependency analysis for Java codebases.**
 
+[![CI](https://github.com/MarcosCordeiro/jastg/actions/workflows/ci.yml/badge.svg)](https://github.com/MarcosCordeiro/jastg/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/jastg.svg)](https://pypi.org/project/jastg/)
+[![Python versions](https://img.shields.io/pypi/pyversions/jastg.svg)](https://pypi.org/project/jastg/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 JASTG extracts class-level dependency graphs and object-oriented metrics from
 Java source code using AST parsing only — no JVM, no classpath, no compilation
 required.  It is designed for reproducible software-engineering research and
@@ -229,7 +235,7 @@ Run provenance for reproducibility (e.g. `metadata_myapp.json`):
 
 ```json
 {
-  "output_dir": "output/myapp",
+  "project_url": "https://github.com/owner/repo",
   "jastg_version": "1.0.0",
   "python_version": "3.12.0 ...",
   "platform": "Linux-6.x...",

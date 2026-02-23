@@ -25,6 +25,26 @@ import networkx as nx
 logger = logging.getLogger(__name__)
 
 
+def _obter_url_remoto(path: Path | None = None) -> str | None:
+    """Attempt to retrieve the git remote origin URL for the repository at *path*.
+
+    Returns ``None`` silently on any failure (not a git repo, no remote, etc.).
+    """
+    try:
+        kwargs: dict = {"capture_output": True, "text": True, "timeout": 5}
+        if path is not None:
+            kwargs["cwd"] = path
+        result = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            **kwargs,
+        )
+        if result.returncode == 0:
+            return result.stdout.strip() or None
+    except Exception:
+        pass
+    return None
+
+
 def _obter_commit_hash() -> str | None:
     """Attempt to retrieve the current git commit hash.
 
@@ -90,6 +110,7 @@ def exportar_saidas(
     ponderado: bool = True,
     direcionado: bool = True,
     config_hash: str | None = None,
+    source_path: Path | None = None,
 ) -> tuple[int, dict]:
     """Generate all output files for a completed analysis run.
 
@@ -109,6 +130,8 @@ def exportar_saidas(
             symmetrize with :func:`gerar_grafo_nao_direcionado`.
         config_hash: Optional SHA-256 hex digest of the run configuration
             (for reproducibility).
+        source_path: Root path of the analysed project, used to resolve
+            its git remote URL.  When ``None`` the URL is not included.
 
     Returns:
         Tuple ``(edges_written, metadata_dict)`` where *edges_written* is
@@ -158,8 +181,9 @@ def exportar_saidas(
     from jastg import __version__ as jastg_version  # avoid circular at module level
 
     commit_hash = _obter_commit_hash()
+    project_url = _obter_url_remoto(source_path)
     metadata = {
-        "output_dir": str(output_dir),
+        "project_url": project_url,
         "jastg_version": jastg_version,
         "python_version": sys.version,
         "platform": platform.platform(),

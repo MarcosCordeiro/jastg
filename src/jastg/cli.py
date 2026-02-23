@@ -229,8 +229,10 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     print(f"  Run date:        {metadata['run_date']}")
     if metadata.get("commit_hash"):
         print(f"  Commit:          {metadata['commit_hash'][:12]}")
+    if metadata.get("project_url"):
+        print(f"  Project URL:     {metadata['project_url']}")
     print(f"{'=' * 60}")
-    print(f"\nOutputs written to: {metadata['output_dir']}/")
+    print(f"\nOutputs written to: {output_dir}/")
     return 0
 
 

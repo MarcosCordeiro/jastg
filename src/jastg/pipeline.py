@@ -150,6 +150,7 @@ def run(
         ponderado=ponderado,
         direcionado=direcionado,
         config_hash=config.config_hash(),
+        source_path=caminhos_path[0] if caminhos_path else None,
     )
 
     logger.info(
