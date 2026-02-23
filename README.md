@@ -302,6 +302,13 @@ are created as strings in memory during the test session.
 
 ---
 
+## Benchmark Dataset
+
+The official structural graph benchmark generated using JASTG is available at:
+https://doi.org/10.5281/zenodo.18744313
+
+---
+
 ## How to cite
 
 If you use JASTG in your research, please cite:

@@ -45,21 +45,19 @@ def _obter_url_remoto(path: Path | None = None) -> str | None:
     return None
 
 
-def _obter_commit_hash() -> str | None:
-    """Attempt to retrieve the current git commit hash.
+def _obter_commit_hash(path: Path | None = None) -> str | None:
+    """Attempt to retrieve the current git commit hash for the repo at *path*.
 
     Returns ``None`` silently on any failure (not a git repo, git not
     installed, timeout, etc.).
     """
     try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
+        kwargs: dict = {"capture_output": True, "text": True, "timeout": 5}
+        if path is not None:
+            kwargs["cwd"] = path
+        result = subprocess.run(["git", "rev-parse", "HEAD"], **kwargs)
         if result.returncode == 0:
-            return result.stdout.strip()
+            return result.stdout.strip() or None
     except Exception:
         pass
     return None
@@ -180,7 +178,7 @@ def exportar_saidas(
     # --- grafo_metadata.json ---
     from jastg import __version__ as jastg_version  # avoid circular at module level
 
-    commit_hash = _obter_commit_hash()
+    commit_hash = _obter_commit_hash(source_path)
     project_url = _obter_url_remoto(source_path)
     metadata = {
         "project_url": project_url,
