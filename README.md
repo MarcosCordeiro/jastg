@@ -35,33 +35,74 @@ community-detection algorithms.
 ## What JASTG captures
 
 JASTG extracts **structural dependencies** between classes based on typed
-syntactic signals in the source code.  A dependency `A → B` with weight `w`
+syntactic signals in the source code. A dependency `A → B` with weight `w`
 means that class `A` references class `B` in `w` distinct typed positions.
 
-| Source of dependency | Example |
-|---|---|
-| `extends` clause | `class A extends B` |
-| `implements` clause | `class A implements I` |
-| Field type | `private B field;` |
-| Method return type | `public B getB() { … }` |
-| Method parameter type | `void f(B param)` |
-| Constructor parameter type | `A(B param)` |
-| `ClassCreator` | `new B(…)` |
-| `LocalVariableDeclaration` | `B local = …;` |
-| `Cast` expression | `(B) value` |
-| `MethodInvocation` qualifier | `B.staticCall()` (uppercase heuristic) |
+JASTG inspects the following **six categories** of typed syntactic sites
+(matching the enumeration in Section 3.1 of the accompanying paper):
 
-**Inner classes** are registered as independent nodes with `$` notation:
+### (i) `extends` and `implements` clauses
+
+```java
+class A extends B           // A → B
+class A implements I        // A → I
+```
+
+### (ii) Field types
+
+```java
+private B field;            // A → B
+```
+
+### (iii) Method and constructor signatures (return and parameter types)
+
+```java
+public B getB() { … }       // return type → B
+void f(B param)             // parameter type → B
+A(B param)                  // constructor parameter type → B
+```
+
+### (iv) Object instantiations (`ClassCreator`)
+
+```java
+new B(…)                    // A → B
+```
+
+### (v) Local variable declarations and cast expressions
+
+```java
+B local = …;                // declared type → B
+(B) value                   // cast target → B
+```
+
+### (vi) `MethodInvocation` qualifier path
+
+```java
+B.staticCall()              // A → B (resolved under the upper heuristic)
+```
+
+The qualifier path is resolved under a configurable heuristic
+(`qualifier_heuristic`, default `upper`); see the *Limitations* section
+below for details and modes.
+
+### Nested classes
+
+Inner classes are registered as independent nodes with the `$` notation
+used by the Java Virtual Machine for inner-class binary names:
 `com.example.Outer$Inner`, `com.example.Outer$Inner$Deep`.
 
-**Object-oriented metrics** computed per class:
+### Object-oriented metrics
+
+JASTG computes the following metrics per class. Note that some
+implementations differ from the canonical definitions in ways documented
+in the *Limitations* section and in Section 3.2 of the paper:
 
 | Metric | Definition |
 |---|---|
-| **LCOM4** | Lack of Cohesion of Methods (v4): connected components in method-attribute graph |
-| **CBO** | Coupling Between Objects: number of distinct internal classes depended on |
-| **RFC** | Response For a Class: NOM + distinct invoked method names |
-| **NOM** | Number of Methods |
+| **LCOM4** | Lack of Cohesion of Methods (v4): weakly connected components in the method–attribute graph |
+| **CBO** | Coupling Between Objects: number of distinct internal classes depended on (lower bound — see Limitations) |
+| **RFC** | Response For a Class: NOM + distinct invoked method names (lower bound — see Limitations) |
+| **NOM** | Number of Methods (including constructors) |
 | **NOA** | Number of Attributes (field declarators) |
 
 ---
@@ -237,10 +278,10 @@ Run provenance for reproducibility (e.g. `metadata_myapp.json`):
 {
   "project_url": "https://github.com/owner/repo",
   "jastg_version": "1.0.0",
-  "python_version": "3.12.0 ...",
-  "platform": "Linux-6.x...",
+  "python_version": "3.12.13",
+  "platform": "Linux-7.0.5-arch1-1-x86_64-...",
   "javalang_version": "0.13.0",
-  "networkx_version": "3.3",
+  "networkx_version": "3.6.1",
   "config_hash": "sha256hex...",
   "run_date": "2026-02-22T12:00:00+00:00",
   "commit_hash": "abc123...",
@@ -274,13 +315,21 @@ GraphML file ready for import into Gephi or any GraphML-compatible tool
 
 - **IDs** are assigned by alphabetical sort of `domain/class` keys, so they
   are identical across runs given the same input.
-- **`config_hash`** in `metadata_{domain}.json` is a SHA-256 digest of the
-  effective configuration (domains, paths, graph mode, qualifier heuristic).
-  Two runs with the same config hash on the same source tree should produce
-  identical graphs.
-- File traversal uses sorted order to eliminate OS-level non-determinism.
-- The `commit_hash` field (if in a git repository) further pins the exact
-  source version analysed.
+- **File traversal** uses sorted order to eliminate OS-level non-determinism.
+- **Reproducibility fingerprint.** The `metadata_{domain}.json` file records
+  the full fingerprint required to reproduce a run, composed of:
+    - `config_hash` — SHA-256 digest of the analysis parameters (domains,
+      paths, graph mode, qualifier heuristic)
+    - `jastg_version`, `javalang_version`, `networkx_version`,
+      `python_version` — tool and dependency versions that materially
+      affect parsing and graph construction
+    - `commit_hash` — exact source version analysed (when run inside a
+      git repository)
+
+  No individual field is sufficient in isolation: the `config_hash` alone
+  does not capture dependency versions, and the `commit_hash` alone does
+  not capture the analysis configuration. The combination of all fields
+  is what guarantees exact reproduction of a prior run.
 
 ---
 
