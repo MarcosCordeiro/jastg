@@ -102,7 +102,7 @@ in the *Limitations* section and in Section 3.2 of the paper:
 | **LCOM4** | Lack of Cohesion of Methods (v4): weakly connected components in the method–attribute graph |
 | **CBO** | Coupling Between Objects: number of distinct internal classes depended on (lower bound — see Limitations) |
 | **RFC** | Response For a Class: NOM + distinct invoked method names (lower bound — see Limitations) |
-| **NOM** | Number of Methods (including constructors) |
+| **NOM** | Number of Methods declared in the class (constructors excluded) |
 | **NOA** | Number of Attributes (field declarators) |
 | **WMC** | Weighted Methods per Class: sum of McCabe cyclomatic complexity over the methods counted by NOM (since 1.1.0) |
 
