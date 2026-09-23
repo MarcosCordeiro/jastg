@@ -63,6 +63,7 @@ means that class `A` references class `B` in `w` distinct typed positions.
 | **RFC** | Response For a Class: NOM + distinct invoked method names |
 | **NOM** | Number of Methods |
 | **NOA** | Number of Attributes (field declarators) |
+| **WMC** | Weighted Methods per Class: sum of McCabe cyclomatic complexity over the methods counted by NOM (since 1.1.0) |
 
 ---
 
@@ -260,7 +261,7 @@ GraphML file ready for import into Gephi or any GraphML-compatible tool
 
 - **Nodes** – one per class, with attributes:
   - `label`: `domain/package.Class` string
-  - `LCOM4`, `CBO`, `RFC`, `NOM`, `NOA`: OO metrics
+  - `LCOM4`, `CBO`, `RFC`, `NOM`, `NOA`, `WMC`: OO metrics
 - **Edges** – one per dependency pair, with optional `weight` attribute
   (present when `--weighted`, absent when `--unweighted`).
   Undirected mode (`--undirected`) symmetrizes pairs as `(min_id, max_id)`

@@ -1,4 +1,4 @@
-"""OO metrics calculations: LCOM4, CBO, RFC, NOM, NOA.
+"""OO metrics calculations: LCOM4, CBO, RFC, NOM, NOA, WMC.
 
 All functions are pure (no I/O). They operate on pre-extracted data
 structures produced by the extraction pass.
@@ -16,11 +16,74 @@ Metric definitions used by JASTG
   RFC is therefore an approximation.
 * **NOM** – Number of Methods.
 * **NOA** – Number of Attributes (field declarators).
+* **WMC** – Weighted Methods per Class (Chidamber & Kemerer, 1994), with
+  McCabe's cyclomatic complexity as the method weight: the sum, over the
+  methods counted by NOM, of ``1 + number of decision points`` in each
+  method body.  Decision points are ``if``, ``for``/``for-each``, ``while``,
+  ``do``, each non-default ``case`` label, ``catch`` clauses, the ternary
+  operator and the short-circuit operators ``&&`` and ``||``.  A method
+  without body (abstract or interface method) has complexity 1, so
+  ``WMC >= NOM`` always holds.  Constructors are excluded, for consistency
+  with NOM.
 """
 
 from __future__ import annotations
 
+import javalang.tree
 import networkx as nx
+
+# AST node types that add one to McCabe's cyclomatic complexity.
+_NOS_DE_DECISAO = (
+    javalang.tree.IfStatement,
+    javalang.tree.ForStatement,  # also covers enhanced for
+    javalang.tree.WhileStatement,
+    javalang.tree.DoStatement,
+    javalang.tree.CatchClause,
+    javalang.tree.TernaryExpression,
+)
+_OPERADORES_CURTO_CIRCUITO = frozenset({"&&", "||"})
+
+
+def calcular_complexidade_ciclomatica(metodo) -> int:
+    """McCabe's cyclomatic complexity of a single method declaration.
+
+    Counts ``1 + decision points`` over the whole subtree of *metodo*
+    (including bodies of lambdas and anonymous classes declared inside it).
+    ``switch`` statements contribute one per non-default ``case`` label;
+    ``default`` does not count.
+
+    Args:
+        metodo: A javalang ``MethodDeclaration`` (or ``ConstructorDeclaration``).
+
+    Returns:
+        Complexity ``>= 1``.  Methods without a body return 1.
+    """
+    if metodo.body is None:
+        return 1
+    complexidade = 1
+    for _, node in metodo:
+        if isinstance(node, _NOS_DE_DECISAO):
+            complexidade += 1
+        elif isinstance(node, javalang.tree.SwitchStatementCase):
+            if node.case:  # ``default`` has an empty ``case`` list
+                complexidade += 1
+        elif isinstance(node, javalang.tree.BinaryOperation):
+            if node.operator in _OPERADORES_CURTO_CIRCUITO:
+                complexidade += 1
+    return complexidade
+
+
+def calcular_wmc(metodos) -> int:
+    """Weighted Methods per Class: sum of cyclomatic complexities.
+
+    Args:
+        metodos: Iterable of javalang ``MethodDeclaration`` nodes (the same
+            collection NOM counts).
+
+    Returns:
+        ``sum(cc(m) for m in metodos)``; 0 for a class without methods.
+    """
+    return sum(calcular_complexidade_ciclomatica(m) for m in metodos)
 
 
 def calcular_lcom4(metodo_para_atributos: dict[str, set[str]]) -> int:

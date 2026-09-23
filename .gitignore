@@ -22,3 +22,7 @@ htmlcov/
 .idea/
 .vscode/
 *.swp
+
+# Perf measurement (local-only — do not version)
+scripts/perf/systems.csv
+scripts/perf/results/

@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 # ---------------------------------------------------------------------------
 [project]
 name = "jastg"
-version = "1.0.0"
+version = "1.1.0"
 description = "Java AST Structural Graph – static structural dependency analysis for Java codebases"
 readme = "README.md"
 license = { file = "LICENSE.txt" }

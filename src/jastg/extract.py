@@ -3,7 +3,7 @@
 For each class/interface found in a parsed AST this module collects:
 
 * Typed structural dependencies (edges) with occurrence counts.
-* OO metrics: LCOM4, CBO, RFC, NOM, NOA.
+* OO metrics: LCOM4, CBO, RFC, NOM, NOA, WMC.
 
 Dependencies are counted per typed occurrence in the source, keeping
 signature and body separate to avoid double-counting (a parameter type
@@ -25,7 +25,7 @@ from jastg.ast.resolve import (
     resolver_tipo,
 )
 from jastg.ast.types import extrair_nomes_de_tipo
-from jastg.metrics.metrics import calcular_lcom4
+from jastg.metrics.metrics import calcular_lcom4, calcular_wmc
 
 logger = logging.getLogger(__name__)
 
@@ -209,7 +209,7 @@ def extrair_dependencias_e_metricas(
         * ``"chave"`` – ``"<domain>/<qualified>"`` key.
         * ``"arquivo"`` – *nome_arquivo* string.
         * ``"metricas"`` – dict with keys ``LCOM4``, ``CBO``, ``RFC``,
-          ``NOM``, ``NOA``.
+          ``NOM``, ``NOA``, ``WMC``.
         * ``"arestas_counter"`` – :class:`~collections.Counter` mapping
           qualified destination name to occurrence weight.
     """
@@ -260,6 +260,7 @@ def extrair_dependencias_e_metricas(
             nom = len(metodos)
             rfc = nom + len(rfc_metodos)
             noa = len(atributos)
+            wmc = calcular_wmc(metodos)
             chave_com_dominio = f"{dominio}/{nome_qual}"
 
             resultados.append(
@@ -273,6 +274,7 @@ def extrair_dependencias_e_metricas(
                         "RFC": rfc,
                         "NOM": nom,
                         "NOA": noa,
+                        "WMC": wmc,
                     },
                     "arestas_counter": dep_counter,
                 }

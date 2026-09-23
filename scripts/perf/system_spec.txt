@@ -1,0 +1,39 @@
+JASTG Performance Measurement — System Specification
+Generated: 2026-05-22T17:22:00-03:00
+Hostname:  PC-Lnx
+
+=== OS / Kernel ===
+Distribution: Arch Linux
+Kernel:       Linux 7.0.5-arch1-1 x86_64
+Uptime:       up 1 week, 4 days, 7 hours, 12 minutes
+
+=== CPU ===
+  CPU(s):                                    32
+
+=== Memory ===
+                 total        used        free      shared  buff/cache   available
+  Mem:            60Gi        16Gi       7.8Gi       480Mi        37Gi        44Gi
+  Swap:             0B          0B          0B
+
+=== Storage (root filesystem) ===
+  Sist. Arq.      Tam. Usado Disp. Uso% Montado em
+  /dev/nvme2n1p2  1,9T  386G  1,4T  22% /
+
+=== Python ===
+  python:  Python 3.12.13
+  python3: Python 3.12.13
+  which:   /home/marcos/data/Mackenzie/Doutorado/Projects/JASTG/jastg/scripts/perf/.venv/bin/python
+
+=== JASTG and key dependencies ===
+  jastg --version: jastg 1.0.0
+  javalang: 0.13.0
+  networkx: 3.6.1
+
+=== GNU time ===
+  time (GNU Time) 1.10
+
+=== Concise summary for paper (copy-paste ready) ===
+   (32 logical cores), 60 GiB RAM,
+  Arch Linux, kernel 7.0.5-arch1-1, Python 3.12.13.
+
+=== END ===

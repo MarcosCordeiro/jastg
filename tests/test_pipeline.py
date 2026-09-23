@@ -141,7 +141,7 @@ def test_end_to_end_graphml(
     # Every node must carry a label and OO metrics
     for _nid, attrs in G.nodes(data=True):
         assert "label" in attrs
-        for metric in ("LCOM4", "CBO", "RFC", "NOM", "NOA"):
+        for metric in ("LCOM4", "CBO", "RFC", "NOM", "NOA", "WMC"):
             assert metric in attrs, f"Node missing metric {metric!r}"
     # Every edge must carry a weight
     for _u, _v, attrs in G.edges(data=True):

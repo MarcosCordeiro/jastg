@@ -1,0 +1,66 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.4">
+  <diagram name="JASTG Pipeline" id="jastg-pipeline">
+    <mxGraphModel dx="1412" dy="742" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="java_src" parent="1" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;size=20;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" value="Java Source Files (.java)" vertex="1">
+          <mxGeometry height="50" width="220" x="275" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pass1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;verticalAlign=middle;" value="&lt;b&gt;Pass 1 — Class Collection&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font&gt;Recursively parse .java files · Register fully-qualified names · Build simple-name index&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="300" x="235" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_src_p1" edge="1" parent="1" source="java_src" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;" target="pass1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="symtab" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;Symbol Table&lt;/b&gt;&lt;br&gt;&lt;font&gt;inner_classes&amp;nbsp; ·&amp;nbsp; simple_name_index &amp;nbsp;·&amp;nbsp; domain_by_class&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="255" y="275" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_p1_sym" edge="1" parent="1" source="pass1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="symtab">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pass2" parent="1" style="swimlane;fontStyle=1;fontSize=10;fillColor=#ffe6cc;strokeColor=#d6b656;startSize=28;horizontal=1;" value="Pass 2 — Dependency and Metric Extraction" vertex="1">
+          <mxGeometry height="120" width="460" x="155" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="typeRes" parent="pass2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" value="&lt;b&gt;Type Resolution&lt;/b&gt;&lt;br&gt;&lt;font&gt;6 ordered rules&lt;br&gt;(no classpath)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="68" width="130" x="10" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="depCount" parent="pass2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" value="&lt;b&gt;Dependency Counting&lt;/b&gt;&lt;br&gt;&lt;font&gt;Occurrence-based&lt;br&gt;edge weights&lt;/font&gt;" vertex="1">
+          <mxGeometry height="68" width="130" x="165" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="metComp" parent="pass2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" value="&lt;b&gt;Metric Computation&lt;/b&gt;&lt;br&gt;&lt;font&gt;LCOM4 · CBO · RFC&lt;br&gt;NOM · NOA&lt;/font&gt;" vertex="1">
+          <mxGeometry height="68" width="130" x="320" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_sym_p2" edge="1" parent="1" source="symtab" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="pass2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_reparse" edge="1" parent="1" source="java_src" style="edgeStyle=orthogonalEdgeStyle;dashed=1;rounded=0;exitX=1;exitY=0.5;exitDX=0;exitDY=0;entryX=1;entryY=0.5;entryDX=0;entryDY=0;fontSize=11;fontStyle=2;" target="pass2" value="re-parse">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="690" y="65" />
+              <mxPoint x="690" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="export_cell" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;" value="&lt;b&gt;Export&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font&gt;Deterministic ID assignment · Graph symmetrisation · Config SHA-256 hash&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="300" x="235" y="578" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_p2_exp" edge="1" parent="1" source="pass2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="export_cell">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="graphml_out" parent="1" style="shape=document;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=12;" value="graph_{domain}.graphml" vertex="1">
+          <mxGeometry height="55" width="185" x="120" y="715" as="geometry" />
+        </mxCell>
+        <mxCell id="json_out" parent="1" style="shape=document;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=12;" value="metadata_{domain}.json" vertex="1">
+          <mxGeometry height="55" width="185" x="465" y="715" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_exp_gml" edge="1" parent="1" source="export_cell" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="graphml_out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_exp_json" edge="1" parent="1" source="export_cell" style="edgeStyle=orthogonalEdgeStyle;rounded=0;" target="json_out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
